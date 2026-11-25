@@ -30,13 +30,14 @@
         {
             lblMinesLeft = new Label();
             btnReset = new Button();
+            btnBackMenu = new Button();
             SuspendLayout();
             // 
             // lblMinesLeft
             // 
             lblMinesLeft.AutoSize = true;
             lblMinesLeft.Font = new Font("Segoe UI Semibold", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            lblMinesLeft.Location = new Point(3, 442);
+            lblMinesLeft.Location = new Point(12, 593);
             lblMinesLeft.Name = "lblMinesLeft";
             lblMinesLeft.Size = new Size(183, 30);
             lblMinesLeft.TabIndex = 0;
@@ -45,7 +46,7 @@
             // btnReset
             // 
             btnReset.Font = new Font("Segoe UI Semibold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            btnReset.Location = new Point(3, 375);
+            btnReset.Location = new Point(12, 526);
             btnReset.Name = "btnReset";
             btnReset.Size = new Size(100, 35);
             btnReset.TabIndex = 1;
@@ -53,11 +54,23 @@
             btnReset.UseVisualStyleBackColor = true;
             btnReset.Click += btnReset_Click;
             // 
+            // btnBackMenu
+            // 
+            btnBackMenu.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            btnBackMenu.Location = new Point(12, 448);
+            btnBackMenu.Name = "btnBackMenu";
+            btnBackMenu.Size = new Size(152, 41);
+            btnBackMenu.TabIndex = 2;
+            btnBackMenu.Text = "Return to the menu";
+            btnBackMenu.UseVisualStyleBackColor = true;
+            btnBackMenu.Click += this.btnBackMenu_Click;
+            // 
             // FormMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(362, 481);
+            ClientSize = new Size(568, 644);
+            Controls.Add(btnBackMenu);
             Controls.Add(btnReset);
             Controls.Add(lblMinesLeft);
             FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -74,5 +87,6 @@
 
         private Label lblMinesLeft;
         private Button btnReset;
+        private Button btnBackMenu;
     }
 }

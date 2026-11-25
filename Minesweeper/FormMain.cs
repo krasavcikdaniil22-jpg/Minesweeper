@@ -2,15 +2,16 @@
 {
     public partial class FormMain : Form
     {
-        private const int Rows = 9;
-        private const int Columns = 9;
-        private const int MinesCount = 10;
+        private int Rows;
+        private int Columns;
+        private int MinesCount;
 
-        private Button[,] buttons = new Button[Rows, Columns];
-        private bool[,] mines = new bool[Rows, Columns];
-        private int[,] adjacentMines = new int[Rows, Columns];
-        private bool[,] revealed = new bool[Rows, Columns];
-        private bool[,] flagged = new bool[Rows, Columns];
+        private Button[,] buttons;
+        private bool[,] mines;
+        private int[,] adjacentMines;
+        private bool[,] revealed;
+        private bool[,] flagged;
+
 
         private int cellSize = 40;
         private int openedCells = 0;
@@ -19,15 +20,51 @@
         private bool firstClick = true;
 
         private Random random = new Random();
-        public FormMain()
+        public FormMain() : this(9,9,10)
+        {
+        }
+
+        public FormMain(int rows, int columns,int minesCount)
         {
             InitializeComponent();
+
+            Rows = rows;
+            Columns = columns;
+            MinesCount = minesCount;
+
+            buttons = new Button[Rows,Columns];
+            mines = new bool[Rows,Columns];
+            adjacentMines = new int[Rows,Columns];
+            revealed = new bool[Rows,Columns];
+            flagged = new bool[Rows,Columns];
+
             CreateGameField();
             PlaceMines();
             CalculateNumbers();
+            AdjustFormSize();
+            UpdateMinesCounter();
         }
 
+        private void AdjustFormSize()
+        {
+            int topSpace = 60;
+            int sideSpace = 20;
+            int fieldWidth = Columns * cellSize;
+            int fieldHeight = Rows * cellSize;
 
+            this.ClientSize = new Size(fieldWidth+sideSpace,fieldHeight+topSpace+btnBackMenu.Height+15);
+
+            lblMinesLeft.Location = new Point(10, 10);
+            btnBackMenu.Location = new Point((fieldWidth - btnBackMenu.Width) / 2 + 10, fieldHeight + 65);
+            btnReset.Location = new Point(fieldWidth - btnReset.Width - 10, 5);
+        }
+
+        private void btnBackMenu_Click(object sender, EventArgs e)
+        {
+            FormMenu menu = new FormMenu();
+            menu.Show();
+            this.Close();
+        }
         private void UpdateMinesCounter()
         {
             lblMinesLeft.Text = "Мин осталось: " + (MinesCount - flagsPlaced);
@@ -67,8 +104,8 @@
                     Button btn = new Button();
                     btn.Width = cellSize;
                     btn.Height = cellSize;
-                    btn.Left = col * cellSize;
-                    btn.Top = row * cellSize;
+                    btn.Left = col * cellSize+10;
+                    btn.Top = row * cellSize+60;
                     btn.Font = new Font("Arial", 12, FontStyle.Bold);
                     btn.Tag = new Point(row, col);
                     btn.MouseUp += Btn_MouseUp;
@@ -198,6 +235,23 @@
             }
         }
 
+        private void RevealAllMines()
+        {
+            for (int row = 0; row<Rows;row++)
+            {
+                for(int col = 0;col< Columns; col++)
+                {
+                    if (mines[row,col] == true)
+                    {
+                        buttons[row, col].Text = "💣";
+                        buttons[row,col].BackColor = Color.LightCoral;
+                        buttons[row,col].ForeColor = Color.Black;
+                        buttons[row, col].Enabled = false;
+                    }
+                }
+            }
+        }
+
         private void OpenCell(int row, int col)
         {
             if (row < 0 || row >= Rows || col < 0 || col >= Columns)
@@ -256,10 +310,9 @@
 
             if (mines[row, col] == true)
             {
-                btn.Text = "X";
-                btn.BackColor = Color.Red;
-
                 gameOver = true;
+                RevealAllMines();
+                btn.BackColor = Color.Red;
                 MessageBox.Show("Ты проиграл! Попробуй еще раз)"); return;
             }
             OpenCell(row, col);
