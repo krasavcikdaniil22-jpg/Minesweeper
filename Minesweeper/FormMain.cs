@@ -5,6 +5,7 @@
         private int Rows;
         private int Columns;
         private int MinesCount;
+        private int elapsedSeconds = 0;
 
         private Button[,] buttons;
         private bool[,] mines;
@@ -20,11 +21,11 @@
         private bool firstClick = true;
 
         private Random random = new Random();
-        public FormMain() : this(9,9,10)
+        public FormMain() : this(9, 9, 10)
         {
         }
 
-        public FormMain(int rows, int columns,int minesCount)
+        public FormMain(int rows, int columns, int minesCount)
         {
             InitializeComponent();
 
@@ -32,11 +33,11 @@
             Columns = columns;
             MinesCount = minesCount;
 
-            buttons = new Button[Rows,Columns];
-            mines = new bool[Rows,Columns];
-            adjacentMines = new int[Rows,Columns];
-            revealed = new bool[Rows,Columns];
-            flagged = new bool[Rows,Columns];
+            buttons = new Button[Rows, Columns];
+            mines = new bool[Rows, Columns];
+            adjacentMines = new int[Rows, Columns];
+            revealed = new bool[Rows, Columns];
+            flagged = new bool[Rows, Columns];
 
             CreateGameField();
             PlaceMines();
@@ -52,11 +53,14 @@
             int fieldWidth = Columns * cellSize;
             int fieldHeight = Rows * cellSize;
 
-            this.ClientSize = new Size(fieldWidth+sideSpace,fieldHeight+topSpace+btnBackMenu.Height+15);
+            this.ClientSize = new Size(fieldWidth + sideSpace, fieldHeight + topSpace + btnBackMenu.Height + 15);
 
             lblMinesLeft.Location = new Point(10, 10);
-            btnBackMenu.Location = new Point((fieldWidth - btnBackMenu.Width) / 2 + 10, fieldHeight + 65);
+            btnBackMenu.Location = new Point(10,fieldHeight + 65);
+            lblTimer.Location = new Point(fieldWidth - lblTimer.Width + 10, fieldHeight + 65);
             btnReset.Location = new Point(fieldWidth - btnReset.Width - 10, 5);
+
+            
         }
 
         private void btnBackMenu_Click(object sender, EventArgs e)
@@ -72,9 +76,9 @@
 
         private void ResetGame()
         {
-            for (int row=0;row<Rows;row++)
+            for (int row = 0; row < Rows; row++)
             {
-                for (int col=0;col<Columns;col++)
+                for (int col = 0; col < Columns; col++)
                 {
                     this.Controls.Remove(buttons[row, col]);
                 }
@@ -82,12 +86,16 @@
             Array.Clear(mines, 0, mines.Length);
             Array.Clear(adjacentMines, 0, adjacentMines.Length);
             Array.Clear(revealed, 0, revealed.Length);
-            Array.Clear(flagged,0,flagged.Length);
+            Array.Clear(flagged, 0, flagged.Length);
 
             firstClick = true;
             openedCells = 0;
             flagsPlaced = 0;
             gameOver = false;
+
+            timer1.Stop();
+            elapsedSeconds = 0;
+            lblTimer.Text = "00:00";
 
             CreateGameField();
             PlaceMines();
@@ -104,8 +112,8 @@
                     Button btn = new Button();
                     btn.Width = cellSize;
                     btn.Height = cellSize;
-                    btn.Left = col * cellSize+10;
-                    btn.Top = row * cellSize+60;
+                    btn.Left = col * cellSize + 10;
+                    btn.Top = row * cellSize + 60;
                     btn.Font = new Font("Arial", 12, FontStyle.Bold);
                     btn.Tag = new Point(row, col);
                     btn.MouseUp += Btn_MouseUp;
@@ -179,13 +187,13 @@
             }
         }
 
-        private void ProtectFirstClick(int row,int col)
+        private void ProtectFirstClick(int row, int col)
         {
-            Array.Clear(mines,0,mines.Length);
+            Array.Clear(mines, 0, mines.Length);
 
             int placedMines = 0;
 
-            while(placedMines < MinesCount)
+            while (placedMines < MinesCount)
             {
                 int newRow = random.Next(Rows);
                 int newCol = random.Next(Columns);
@@ -194,14 +202,14 @@
 
                 if (protectedCell == false && mines[newRow, newCol] == false)
                 {
-                    mines[newRow, newCol]= true;
+                    mines[newRow, newCol] = true;
                     placedMines++;
                 }
             }
-            Array.Clear(adjacentMines,0,adjacentMines.Length);
+            Array.Clear(adjacentMines, 0, adjacentMines.Length);
             CalculateNumbers();
             firstClick = false;
-            
+
         }
 
         private void CalculateNumbers()
@@ -237,15 +245,15 @@
 
         private void RevealAllMines()
         {
-            for (int row = 0; row<Rows;row++)
+            for (int row = 0; row < Rows; row++)
             {
-                for(int col = 0;col< Columns; col++)
+                for (int col = 0; col < Columns; col++)
                 {
-                    if (mines[row,col] == true)
+                    if (mines[row, col] == true)
                     {
                         buttons[row, col].Text = "💣";
-                        buttons[row,col].BackColor = Color.LightCoral;
-                        buttons[row,col].ForeColor = Color.Black;
+                        buttons[row, col].BackColor = Color.LightCoral;
+                        buttons[row, col].ForeColor = Color.Black;
                         buttons[row, col].Enabled = false;
                     }
                 }
@@ -301,16 +309,18 @@
             int row = position.X;
             int col = position.Y;
 
-            if (firstClick==true)
+            if (firstClick == true)
             {
                 ProtectFirstClick(row, col);
                 //MessageBox.Show("Первый клик! Число соседних мин: " + adjacentMines[row, col]);
             }
-           
+
+            timer1.Start();
 
             if (mines[row, col] == true)
             {
                 gameOver = true;
+                timer1.Stop();
                 RevealAllMines();
                 btn.BackColor = Color.Red;
                 MessageBox.Show("Ты проиграл! Попробуй еще раз)"); return;
@@ -320,6 +330,7 @@
             if (openedCells == Rows * Columns - MinesCount)
             {
                 gameOver = true;
+                timer1.Stop();
                 MessageBox.Show("Поздравляем с победой)))");
             }
         }
@@ -331,6 +342,12 @@
         private void btnReset_Click(object sender, EventArgs e)
         {
             ResetGame();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            elapsedSeconds++;
+            lblTimer.Text = TimeSpan.FromSeconds(elapsedSeconds).ToString(@"mm\:ss");
         }
     }
 }
